@@ -11,6 +11,7 @@ function SectionCard({
 }) {
   return (
     <div
+      className="route-section-card"
       style={{
         background: '#183c26',
         border: `2px solid ${color}`,
@@ -73,14 +74,20 @@ function SectionCard({
 export default function RoutePage() {
   return (
     <>
-      <style>{`body { margin: 0; background: #10281a; }`}</style>
+      <style>{`
+        body { margin: 0; background: #10281a; }
+        @media (max-width: 640px) {
+          .route-intro-card { padding: 20px 18px !important; }
+          .route-section-card { padding: 24px 20px !important; }
+        }
+      `}</style>
       <div style={{ minHeight: '100vh', background: '#10281a', color: '#e6ffe6', fontFamily: 'sans-serif' }}>
         {/* Header */}
         <div style={{ maxWidth: 860, margin: '0 auto', padding: '52px 28px 0' }}>
           <Link href="/" style={{ color: '#7adf8c', fontSize: 13, textDecoration: 'none', letterSpacing: '0.04em' }}>
             ← Back to log
           </Link>
-          <h1 style={{ color: '#b6f5c1', fontSize: 42, margin: '20px 0 8px', letterSpacing: '-1px', lineHeight: 1 }}>
+          <h1 style={{ color: '#b6f5c1', fontSize: 'clamp(28px, 8vw, 42px)', margin: '20px 0 8px', letterSpacing: '-1px', lineHeight: 1 }}>
             My Route
           </h1>
           <p style={{ color: '#7adf8c', fontSize: 17, margin: '0 0 40px' }}>
@@ -91,6 +98,7 @@ export default function RoutePage() {
         {/* Intro */}
         <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 28px 48px' }}>
           <div
+            className="route-intro-card"
             style={{
               background: '#183c26',
               border: '1px solid #7adf8c33',

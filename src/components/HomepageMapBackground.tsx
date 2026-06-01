@@ -14,6 +14,8 @@ const ANIM_START_OFFSET = CYCLE_MS * 0.216;
 const HOLD_MS = 4_000;
 const FADE_MS = 2_000;
 const PULSE_CYCLE_MS = 30_000;
+// Lake Tahoe is ~39°N; PCT runs 32.7°N→49°N → fraction ≈ (39-32.7)/(49-32.7) ≈ 0.387
+const PULSE_TAHOE_OFFSET = PULSE_CYCLE_MS * 0.387;
 const THEMES = ['mountains', 'roads'] as const;
 type Theme = typeof THEMES[number];
 
@@ -287,7 +289,7 @@ export default function HomepageMapBackground() {
           if (destroyed) return;
           const coords = pctCoordsRef.current;
           if (!coords.length) { pulseRafRef.current = requestAnimationFrame(pulseTick); return; }
-          if (!pulseT0Ref.current) pulseT0Ref.current = ts;
+          if (!pulseT0Ref.current) pulseT0Ref.current = ts - PULSE_TAHOE_OFFSET;
 
           const progress = ((ts - pulseT0Ref.current) % PULSE_CYCLE_MS) / PULSE_CYCLE_MS;
           const rawIdx = progress * (coords.length - 1);

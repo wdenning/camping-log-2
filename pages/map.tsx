@@ -20,7 +20,12 @@ export default function MapPage() {
 
   return (
     <>
-      <style>{`body { margin: 0; }`}</style>
+      <style>{`
+        body { margin: 0; }
+        @media (max-width: 480px) {
+          .map-header-subtitle { display: none; }
+        }
+      `}</style>
       <div style={{ position: 'relative', width: '100vw', height: '100vh', background: '#10281a' }}>
         <GlobalMap basemap={basemap} />
 
@@ -43,7 +48,7 @@ export default function MapPage() {
             <span style={{ color: '#b6f5c1', fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: 18 }}>
               PCT Hike Log
             </span>
-            <span style={{ color: '#4a7a5a', fontFamily: 'sans-serif', fontSize: 14, marginLeft: 12 }}>
+            <span className="map-header-subtitle" style={{ color: '#4a7a5a', fontFamily: 'sans-serif', fontSize: 14, marginLeft: 12 }}>
               Full Trail Overview
             </span>
           </div>

@@ -16,6 +16,8 @@ import {
   MdPlayArrow,
   MdPause,
   MdLayers,
+  MdExpandLess,
+  MdExpandMore,
 } from 'react-icons/md';
 import { FiMap, FiSun, FiArrowUpRight } from 'react-icons/fi';
 
@@ -51,6 +53,15 @@ export default function PostPage({ post }: { post: Post }) {
   const [animationSpeed, setAnimationSpeed] = useState(1);
   const [cameraAttached, setCameraAttached] = useState(true);
   const [waypoints, setWaypoints] = useState<any>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Fetch Halfmile waypoints for sections K and L, filter to this post's bbox
   useEffect(() => {
@@ -86,15 +97,12 @@ export default function PostPage({ post }: { post: Post }) {
           setEndIdx(coords.length - 1);
         });
     } else {
-      // Slice the official PCT centerline to this section's mile range
-      // Use GPS coords (from Halfmile reference) when available for accurate snapping
       fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/Full_PCT_Simplified.geojson`)
         .then((r) => r.json())
         .then((full) => {
           const coords: [number, number][] = full.features[0].geometry.coordinates;
           const fullLine = lineString(coords);
           const PCT_TOTAL = 2650;
-          // Compute actual geographic length once to derive scale for fallback
           let totalGeo = 0;
           for (let j = 1; j < coords.length; j++) {
             const dx = (coords[j][0] - coords[j-1][0]) * Math.cos(coords[j][1] * Math.PI / 180) * 69.11;
@@ -174,6 +182,32 @@ export default function PostPage({ post }: { post: Post }) {
     pctMileStart: post.pctMileStart,
   };
 
+  // Panel content shared between desktop and mobile
+  const panelContent = (
+    <>
+      <Link href="/" style={{ color: '#7adf8c', fontSize: 13, textDecoration: 'none', marginBottom: 20, display: 'inline-block', letterSpacing: '0.04em' }}>
+        ← All sections
+      </Link>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+        <span style={{ background: post.status === 'completed' ? '#7adf8c' : '#fbbf24', color: '#10281a', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 'bold' }}>
+          {post.status === 'completed' ? 'Completed' : 'Planned'}
+        </span>
+        <span style={{ background: post.state === 'WA' ? '#3b82f6' : post.state === 'OR' ? '#10b981' : '#f59e0b', color: '#10281a', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 'bold' }}>
+          {post.state} §{post.section}
+        </span>
+      </div>
+      <h1 style={{ color: '#b6f5c1', margin: '0 0 4px', fontSize: 26, lineHeight: 1.2 }}>{post.title}</h1>
+      <div style={{ color: '#7adf8c', fontSize: 13, marginBottom: 16 }}>
+        {post.date} &nbsp;·&nbsp; Miles {post.pctMileStart}–{post.pctMileEnd}
+      </div>
+      <p style={{ color: '#e6ffe6', fontSize: 15, lineHeight: 1.6, margin: 0 }}>{post.description}</p>
+    </>
+  );
+
+  const scrubberBottom = isMobile
+    ? (panelOpen ? 'calc(50vh + 10px)' : '62px')
+    : 24;
+
   return (
     <>
       <style>{`body { margin: 0; }`}</style>
@@ -198,47 +232,84 @@ export default function PostPage({ post }: { post: Post }) {
           {geojson && <Map3D {...mapProps} visualizerIdx={currentIdx} />}
         </div>
 
-        {/* Left panel */}
-        <div
-          style={{
-            position: 'relative',
-            zIndex: 2,
-            width: 380,
-            minHeight: '100vh',
-            height: '100vh',
-            background: '#10281aee',
-            boxShadow: '2px 0 16px #0008',
-            padding: '28px 28px 28px',
-            display: 'flex',
-            flexDirection: 'column',
-            overflowY: 'auto',
-            backdropFilter: 'blur(4px)',
-          }}
-        >
-          <Link href="/" style={{ color: '#7adf8c', fontSize: 13, textDecoration: 'none', marginBottom: 20, display: 'inline-block', letterSpacing: '0.04em' }}>
-            ← All sections
-          </Link>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-            <span style={{ background: post.status === 'completed' ? '#7adf8c' : '#fbbf24', color: '#10281a', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 'bold' }}>
-              {post.status === 'completed' ? 'Completed' : 'Planned'}
-            </span>
-            <span style={{ background: post.state === 'WA' ? '#3b82f6' : post.state === 'OR' ? '#10b981' : '#f59e0b', color: '#10281a', borderRadius: 6, padding: '2px 10px', fontSize: 12, fontWeight: 'bold' }}>
-              {post.state} §{post.section}
-            </span>
+        {/* Desktop: Left panel */}
+        {!isMobile && (
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 2,
+              width: 380,
+              minHeight: '100vh',
+              height: '100vh',
+              background: '#10281aee',
+              boxShadow: '2px 0 16px #0008',
+              padding: '28px 28px 28px',
+              display: 'flex',
+              flexDirection: 'column',
+              overflowY: 'auto',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            {panelContent}
           </div>
-          <h1 style={{ color: '#b6f5c1', margin: '0 0 4px', fontSize: 26, lineHeight: 1.2 }}>{post.title}</h1>
-          <div style={{ color: '#7adf8c', fontSize: 13, marginBottom: 16 }}>
-            {post.date} &nbsp;·&nbsp; Miles {post.pctMileStart}–{post.pctMileEnd}
+        )}
+
+        {/* Mobile: Bottom sheet panel */}
+        {isMobile && (
+          <div
+            style={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 20,
+              height: panelOpen ? '50vh' : '52px',
+              transition: 'height 0.3s ease',
+              background: '#10281af0',
+              backdropFilter: 'blur(8px)',
+              boxShadow: '0 -2px 16px #0008',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Handle bar */}
+            <button
+              onClick={() => setPanelOpen((v) => !v)}
+              style={{
+                height: 52,
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 20px',
+                background: 'none',
+                border: 'none',
+                borderBottom: panelOpen ? '1px solid #7adf8c22' : 'none',
+                cursor: 'pointer',
+                width: '100%',
+              }}
+            >
+              <span style={{ color: '#b6f5c1', fontWeight: 'bold', fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '80%' }}>
+                {post.title}
+              </span>
+              <span style={{ color: '#7adf8c', fontSize: 22, flexShrink: 0 }}>
+                {panelOpen ? <MdExpandMore /> : <MdExpandLess />}
+              </span>
+            </button>
+            {/* Scrollable content */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px 20px' }}>
+              {panelContent}
+            </div>
           </div>
-          <p style={{ color: '#e6ffe6', fontSize: 15, lineHeight: 1.6, margin: 0 }}>{post.description}</p>
-        </div>
+        )}
 
         {/* Floating controls — top right */}
-        <div style={{ position: 'fixed', top: 18, right: 24, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
+        <div style={{ position: 'fixed', top: 18, right: isMobile ? 14 : 24, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: isMobile ? 6 : 10 }}>
           {/* Play/Pause */}
           <button
             onClick={handlePlayClick}
-            style={{ width: 48, height: 48, background: playing ? '#7adf8c' : '#14532d', color: playing ? '#10281a' : '#e6ffe6', border: '1px solid #7adf8c', borderRadius: 8, fontSize: 28, cursor: 'pointer', boxShadow: '0 2px 8px #0008', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ width: isMobile ? 42 : 48, height: isMobile ? 42 : 48, background: playing ? '#7adf8c' : '#14532d', color: playing ? '#10281a' : '#e6ffe6', border: '1px solid #7adf8c', borderRadius: 8, fontSize: 28, cursor: 'pointer', boxShadow: '0 2px 8px #0008', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             title={playing ? 'Pause' : 'Play'}
           >
             {playing ? <MdPause /> : <MdPlayArrow />}
@@ -252,8 +323,8 @@ export default function PostPage({ post }: { post: Post }) {
             </div>
           )}
 
-          {/* Fullscreen */}
-          {!mapFullscreen && (
+          {/* Fullscreen — desktop only */}
+          {!isMobile && !mapFullscreen && (
             <button
               onClick={() => setMapFullscreen(true)}
               style={{ width: 48, height: 48, background: '#14532d', color: '#e6ffe6', border: '1px solid #7adf8c', borderRadius: 8, fontSize: 22, cursor: 'pointer', boxShadow: '0 2px 8px #0008', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -266,7 +337,7 @@ export default function PostPage({ post }: { post: Post }) {
           {/* Layers */}
           <button
             onClick={() => setLayersOpen((v) => !v)}
-            style={{ width: 48, height: 48, background: '#14532d', color: '#e6ffe6', border: '1px solid #7adf8c', borderRadius: 8, fontSize: 22, cursor: 'pointer', boxShadow: '0 2px 8px #0008', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ width: isMobile ? 42 : 48, height: isMobile ? 42 : 48, background: '#14532d', color: '#e6ffe6', border: '1px solid #7adf8c', borderRadius: 8, fontSize: 22, cursor: 'pointer', boxShadow: '0 2px 8px #0008', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             title="Basemap"
           >
             <MdLayers />
@@ -275,7 +346,7 @@ export default function PostPage({ post }: { post: Post }) {
           {/* Settings */}
           <button
             onClick={() => setLegendOpen((v) => !v)}
-            style={{ width: 48, height: 48, background: '#14532d', color: '#e6ffe6', border: '1px solid #7adf8c', borderRadius: 8, fontSize: 22, cursor: 'pointer', boxShadow: '0 2px 8px #0008', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ width: isMobile ? 42 : 48, height: isMobile ? 42 : 48, background: '#14532d', color: '#e6ffe6', border: '1px solid #7adf8c', borderRadius: 8, fontSize: 22, cursor: 'pointer', boxShadow: '0 2px 8px #0008', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             title="Settings"
           >
             <MdSettings />
@@ -283,7 +354,7 @@ export default function PostPage({ post }: { post: Post }) {
 
           {/* Layers panel */}
           {layersOpen && (
-            <div style={{ background: '#183c26', border: '1px solid #7adf8c', borderRadius: 8, padding: 16, minWidth: 260, maxWidth: 340, boxShadow: '0 2px 16px #000a' }}>
+            <div style={{ background: '#183c26', border: '1px solid #7adf8c', borderRadius: 8, padding: 16, minWidth: isMobile ? 220 : 260, maxWidth: isMobile ? 280 : 340, boxShadow: '0 2px 16px #000a' }}>
               <label style={{ fontSize: 13, color: '#b6f5c1', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Basemap</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: 10, borderRadius: 8, overflow: 'hidden', border: '1px solid #7adf8c' }}>
                 {basemapOptions.map((opt, i) => {
@@ -325,7 +396,7 @@ export default function PostPage({ post }: { post: Post }) {
 
           {/* Settings panel */}
           {legendOpen && (
-            <div style={{ background: '#183c26', border: '1px solid #7adf8c', borderRadius: 8, padding: 16, minWidth: 240, maxWidth: 320, boxShadow: '0 2px 16px #000a', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ background: '#183c26', border: '1px solid #7adf8c', borderRadius: 8, padding: 16, minWidth: isMobile ? 200 : 240, maxWidth: isMobile ? 260 : 320, boxShadow: '0 2px 16px #000a', display: 'flex', flexDirection: 'column', gap: 12 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showTrail} onChange={(e) => setShowTrail(e.target.checked)} />
                 Show Trail
@@ -364,10 +435,26 @@ export default function PostPage({ post }: { post: Post }) {
         </div>
 
         {/* Scrubber bar */}
-        <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 25, display: 'flex', alignItems: 'center', gap: 10, background: '#10281acc', border: '1px solid #7adf8c44', borderRadius: 12, padding: '10px 18px', backdropFilter: 'blur(6px)' }}>
+        <div style={{
+          position: 'fixed',
+          bottom: scrubberBottom,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 25,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          background: '#10281acc',
+          border: '1px solid #7adf8c44',
+          borderRadius: 12,
+          padding: '10px 18px',
+          backdropFilter: 'blur(6px)',
+          transition: 'bottom 0.3s ease',
+          maxWidth: 'calc(100vw - 32px)',
+        }}>
           <button
             onClick={() => setCurrentIdx('start')}
-            style={{ background: 'none', border: 'none', color: '#7adf8c', fontSize: 13, cursor: 'pointer', padding: '0 4px', fontWeight: 'bold' }}
+            style={{ background: 'none', border: 'none', color: '#7adf8c', fontSize: 13, cursor: 'pointer', padding: '0 4px', fontWeight: 'bold', whiteSpace: 'nowrap' }}
           >
             {post.pctMileStart}
           </button>
@@ -377,11 +464,11 @@ export default function PostPage({ post }: { post: Post }) {
             max={endIdx || 1}
             value={typeof currentIdx === 'number' ? currentIdx : startIdx}
             onChange={(e) => setCurrentIdx(Number(e.target.value))}
-            style={{ width: 240, accentColor: '#7adf8c' }}
+            style={{ width: isMobile ? 160 : 240, accentColor: '#7adf8c' }}
           />
           <button
             onClick={() => setCurrentIdx('end')}
-            style={{ background: 'none', border: 'none', color: '#7adf8c', fontSize: 13, cursor: 'pointer', padding: '0 4px', fontWeight: 'bold' }}
+            style={{ background: 'none', border: 'none', color: '#7adf8c', fontSize: 13, cursor: 'pointer', padding: '0 4px', fontWeight: 'bold', whiteSpace: 'nowrap' }}
           >
             {post.pctMileEnd}
           </button>

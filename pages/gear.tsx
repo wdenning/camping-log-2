@@ -130,6 +130,7 @@ const SLICES = (() => {
 export default function GearPage() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const pieGRef = useRef<SVGGElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -141,6 +142,13 @@ export default function GearPage() {
   const scrollToSection = (idx: number) => {
     sectionRefs.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Keep activeIdxRef in sync for scroll handler (avoids stale closure)
   useEffect(() => { activeIdxRef.current = activeIdx; }, [activeIdx]);
@@ -163,12 +171,12 @@ export default function GearPage() {
     );
     panel.querySelectorAll('[data-section]').forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [isMobile]);
 
   // Arc effect — items bow right as they pass the panel center
   useEffect(() => {
     const panel = panelRef.current;
-    if (!panel) return;
+    if (!panel || isMobile) return;
     const ARC_R = 300;
     const MAX_X = 56;
     const update = () => {
@@ -186,7 +194,7 @@ export default function GearPage() {
     panel.addEventListener('scroll', update, { passive: true });
     update();
     return () => panel.removeEventListener('scroll', update);
-  }, []);
+  }, [isMobile]);
 
   // Pie scroll-rotation — continuously rotates as user scrolls through each section
   useEffect(() => {
@@ -207,7 +215,9 @@ export default function GearPage() {
     panel.addEventListener('scroll', update, { passive: true });
     update();
     return () => panel.removeEventListener('scroll', update);
-  }, []);
+  }, [isMobile]);
+
+  const svgSize = isMobile ? 160 : 280;
 
   return (
     <>
@@ -216,7 +226,7 @@ export default function GearPage() {
         * { box-sizing: border-box; }
       `}</style>
 
-      <div style={{ position: 'relative', display: 'flex', height: '100vh', overflow: 'hidden', background: '#10281a', color: '#e6ffe6', fontFamily: 'sans-serif' }}>
+      <div style={{ position: 'relative', display: 'flex', flexDirection: isMobile ? 'column' : 'row', height: '100vh', overflow: 'hidden', background: '#10281a', color: '#e6ffe6', fontFamily: 'sans-serif' }}>
 
         {/* Header overlay */}
         <div
@@ -249,29 +259,30 @@ export default function GearPage() {
           </Link>
         </div>
 
-        {/* ── LEFT: donut ── */}
+        {/* ── CHART PANEL (left on desktop, top on mobile) ── */}
         <div style={{
-          width: 280,
+          width: isMobile ? '100%' : 280,
+          height: isMobile ? 'auto' : '100vh',
           flexShrink: 0,
-          height: '100vh',
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: isMobile ? 'row' : 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: 20,
+          justifyContent: isMobile ? 'center' : 'center',
+          gap: isMobile ? 16 : 20,
           background: '#10281a',
-          borderRight: 'none',
-          padding: '28px 8px',
+          padding: isMobile ? '72px 16px 12px' : '28px 8px',
           overflowY: 'hidden',
         }}>
 
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ color: '#7adf8c', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 2 }}>PCT 2026</div>
-            <div style={{ color: '#b6f5c1', fontSize: 20, fontWeight: 'bold' }}>Gear List</div>
-          </div>
+          {!isMobile && (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ color: '#7adf8c', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 2 }}>PCT 2026</div>
+              <div style={{ color: '#b6f5c1', fontSize: 20, fontWeight: 'bold' }}>Gear List</div>
+            </div>
+          )}
 
           {/* Donut chart */}
-          <svg width={280} height={280} viewBox="0 0 280 280" style={{ overflow: 'visible', display: 'block', flexShrink: 0 }}>
+          <svg width={svgSize} height={svgSize} viewBox="0 0 280 280" style={{ overflow: 'visible', display: 'block', flexShrink: 0 }}>
             <g ref={pieGRef} style={{ transformOrigin: `${CX}px ${CY}px` }}>
               {CATEGORIES.map((cat, i) => (
                 <path
@@ -298,19 +309,48 @@ export default function GearPage() {
             </text>
           </svg>
 
+          {/* Category list on mobile (tap to scroll) */}
+          {isMobile && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {CATEGORIES.map((cat, i) => (
+                <button
+                  key={cat.id}
+                  onClick={() => scrollToSection(i)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: '4px 0',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: cat.color, opacity: i === activeIdx ? 1 : 0.35, flexShrink: 0, display: 'inline-block' }} />
+                  <span style={{ color: i === activeIdx ? cat.color : '#7adf8c66', fontSize: 12, fontWeight: i === activeIdx ? 'bold' : 'normal', transition: 'color 0.2s' }}>
+                    {cat.label}
+                  </span>
+                </button>
+              ))}
+              <div style={{ color: '#b6f5c1', fontSize: 11, marginTop: 4, opacity: 0.6 }}>
+                Total {TOTAL_LB} lb
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* ── RIGHT: scrollable sections ── */}
+        {/* ── SCROLLABLE LIST PANEL ── */}
         <div
           ref={panelRef}
           style={{
             flex: 1,
-            height: '100vh',
+            height: isMobile ? undefined : '100vh',
             overflowY: 'auto',
             overflowX: 'hidden',
-            padding: '64px 52px 140px 16px',
-            maskImage: 'linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)',
+            padding: isMobile ? '16px 20px 80px' : '64px 52px 140px 16px',
+            maskImage: isMobile ? undefined : 'linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)',
+            WebkitMaskImage: isMobile ? undefined : 'linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%)',
           }}>
 
           {/* Gear sections */}
@@ -329,7 +369,7 @@ export default function GearPage() {
                   marginBottom: 20,
                   paddingBottom: 14,
                   borderBottom: `2px solid ${cat.color}33`,
-                  maxWidth: 340,
+                  maxWidth: isMobile ? '100%' : 340,
                 }}
               >
                 <div style={{ flex: 1 }}>
@@ -357,7 +397,7 @@ export default function GearPage() {
                     background: '#0f2016',
                     cursor: 'default',
                     willChange: 'transform',
-                    maxWidth: 340,
+                    maxWidth: isMobile ? '100%' : 340,
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.borderLeftColor = cat.color;
