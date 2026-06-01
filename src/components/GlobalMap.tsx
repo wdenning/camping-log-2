@@ -311,7 +311,7 @@ export default function GlobalMap({ basemap = 'topo' }: { basemap?: GlobalBasema
     for (const { coord, title, subtitle, color, showDot, lineLength } of [
       { coord: [-116.4806, 32.5899] as [number, number], title: 'Mexico', subtitle: 'Southern Terminus', color: '#fbbf24', showDot: true, lineLength: undefined },
       { coord: [-120.8029, 48.9994] as [number, number], title: 'Canada', subtitle: 'Northern Terminus', color: '#7adf8c', showDot: true, lineLength: undefined },
-      { coord: echoLakeTrailCoord, title: '★ Echo Lake', subtitle: 'Flip-flop Start', color: '#7adf8c', showDot: false, lineLength: 72 },
+      { coord: echoLakeTrailCoord, title: 'Echo Lake', subtitle: 'Flip-flop Start', color: '#7adf8c', showDot: false, lineLength: 72 },
     ] as { coord: [number,number]; title: string; subtitle: string; color: string; showDot: boolean; lineLength?: number }[]) {
       markersRef.current.push(
         new maplibregl.Marker({ element: makeLeaderLabel({ title, subtitle, color, showDot, lineLength }), anchor: 'left' })

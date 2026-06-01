@@ -82,6 +82,55 @@ export default function Home({ posts }: { posts: Post[] }) {
       <style>{`
         body { margin: 0; background: #060d08; }
         a:hover > div { border-color: #7adf8c !important; box-shadow: 0 4px 24px #0006; }
+
+        .btn-glass {
+          position: relative;
+          display: inline-block;
+          padding: 13px 26px;
+          border-radius: 10px;
+          font-size: 15px;
+          font-weight: bold;
+          text-decoration: none;
+          overflow: hidden;
+          color: #e6ffe6;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+          background: transparent;
+          backdrop-filter: blur(48px) saturate(2.2) brightness(1.06);
+          -webkit-backdrop-filter: blur(48px) saturate(2.2) brightness(1.06);
+          border: 1px solid rgba(255,255,255,0.07);
+          box-shadow: 0 1px 8px rgba(0,0,0,0.12);
+        }
+        /* Edge refraction — faint left/right brightening only */
+        .btn-glass::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          background:
+            linear-gradient(to right, rgba(255,255,255,0.06) 0%, transparent 18%),
+            linear-gradient(to left,  rgba(255,255,255,0.05) 0%, transparent 18%);
+          pointer-events: none;
+        }
+        .btn-glass::after { display: none; }
+        .btn-glass:hover {
+          transform: translateY(-2px) scale(1.03);
+          border-color: rgba(182,245,193,0.22);
+          box-shadow: 0 4px 18px rgba(0,0,0,0.22);
+        }
+        .btn-glass:active {
+          transform: translateY(0) scale(0.97);
+          box-shadow: 0 1px 6px rgba(0,0,0,0.12);
+        }
+
+        .btn-glass-primary {
+          background: transparent;
+          border-color: rgba(122,223,140,0.12);
+          box-shadow: 0 1px 8px rgba(0,0,0,0.12);
+        }
+        .btn-glass-primary:hover {
+          border-color: rgba(122,223,140,0.28);
+          box-shadow: 0 4px 18px rgba(0,0,0,0.22);
+        }
       `}</style>
       <div style={{ color: '#e6ffe6', fontFamily: 'sans-serif', position: 'relative', zIndex: 1 }}>
 
@@ -120,35 +169,10 @@ export default function Home({ posts }: { posts: Post[] }) {
             Summer 2026 Flip-Fop Hike on the Pacific Crest Trail
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Link
-              href="/gear"
-              style={{
-                background: 'rgba(6,13,8,0.65)',
-                color: '#7adf8c',
-                border: '1.5px solid #7adf8c55',
-                borderRadius: 8,
-                padding: '13px 26px',
-                fontSize: 15,
-                fontWeight: 'bold',
-                textDecoration: 'none',
-                backdropFilter: 'blur(8px)',
-              }}
-            >
+            <Link href="/gear" className="btn-glass">
               Gear
             </Link>
-            <Link
-              href="/map"
-              style={{
-                background: '#14532d',
-                color: '#e6ffe6',
-                border: '1.5px solid #7adf8c',
-                borderRadius: 8,
-                padding: '13px 26px',
-                fontSize: 15,
-                fontWeight: 'bold',
-                textDecoration: 'none',
-              }}
-            >
+            <Link href="/map" className="btn-glass btn-glass-primary">
               See the Map →
             </Link>
           </div>
