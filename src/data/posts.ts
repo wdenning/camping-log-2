@@ -21,7 +21,7 @@ export const POSTS: Post[] = [
     title: 'Echo Lake to Sierra City',
     section: 'J/K',
     state: 'CA',
-    date: 'Day 1-9',
+    date: 'Day 1-6',
     description:
       'Starting the flip-flop at Echo Lake near South Lake Tahoe, crossing rolling Sierra granite past Donner Pass and dropping through the Tahoe National Forest to Sierra City.',
     gpxFile: null,
