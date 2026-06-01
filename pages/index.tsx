@@ -83,101 +83,138 @@ export default function Home({ posts }: { posts: Post[] }) {
         body { margin: 0; background: #060d08; }
         a:hover > div { border-color: #7adf8c !important; box-shadow: 0 4px 24px #0006; }
       `}</style>
-      <div style={{ minHeight: '100vh', color: '#e6ffe6', fontFamily: 'sans-serif', position: 'relative', zIndex: 1 }}>
-        {/* Header */}
-        <div style={{ maxWidth: 1020, margin: '0 auto', padding: '52px 28px 40px' }}>
-          <div
+      <div style={{ color: '#e6ffe6', fontFamily: 'sans-serif', position: 'relative', zIndex: 1 }}>
+
+        {/* Hero */}
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            padding: '0 28px',
+          }}
+        >
+          <h1
             style={{
-              display: 'flex',
-              alignItems: 'flex-end',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: 16,
-              marginBottom: 8,
+              color: '#b6f5c1',
+              margin: '0 0 14px',
+              fontSize: 'clamp(38px, 6vw, 68px)',
+              letterSpacing: '-2px',
+              lineHeight: 1,
+              textShadow: '0 2px 32px #000c',
             }}
           >
-            <div>
-              <h1 style={{ color: '#b6f5c1', margin: 0, fontSize: 42, letterSpacing: '-1px', lineHeight: 1 }}>
-                PCT Hike Log
-              </h1>
-              <p style={{ color: '#7adf8c', margin: '10px 0 0', fontSize: 17 }}>
-                Pacific Crest Trail
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <Link
-                href="/gear"
-                style={{
-                  background: 'transparent',
-                  color: '#7adf8c',
-                  border: '1.5px solid #7adf8c44',
-                  borderRadius: 8,
-                  padding: '12px 22px',
-                  fontSize: 15,
-                  fontWeight: 'bold',
-                  textDecoration: 'none',
-                }}
-              >
-                Gear
-              </Link>
-              <Link
-                href="/map"
-                style={{
-                  background: '#14532d',
-                  color: '#e6ffe6',
-                  border: '1.5px solid #7adf8c',
-                  borderRadius: 8,
-                  padding: '12px 22px',
-                  fontSize: 15,
-                  fontWeight: 'bold',
-                  textDecoration: 'none',
-                }}
-              >
-                See the Map →
-              </Link>
-            </div>
+            PCT Hike Log
+          </h1>
+          <p
+            style={{
+              color: '#7adf8c',
+              margin: '0 0 44px',
+              fontSize: 18,
+              textShadow: '0 1px 12px #000b',
+            }}
+          >
+            Summer 2026 Flip-Fop Hike on the Pacific Crest Trail
+          </p>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+            <Link
+              href="/gear"
+              style={{
+                background: 'rgba(6,13,8,0.65)',
+                color: '#7adf8c',
+                border: '1.5px solid #7adf8c55',
+                borderRadius: 8,
+                padding: '13px 26px',
+                fontSize: 15,
+                fontWeight: 'bold',
+                textDecoration: 'none',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              Gear
+            </Link>
+            <Link
+              href="/map"
+              style={{
+                background: '#14532d',
+                color: '#e6ffe6',
+                border: '1.5px solid #7adf8c',
+                borderRadius: 8,
+                padding: '13px 26px',
+                fontSize: 15,
+                fontWeight: 'bold',
+                textDecoration: 'none',
+              }}
+            >
+              See the Map →
+            </Link>
           </div>
         </div>
 
-        {/* Completed section */}
-        {completed.length > 0 && (
-          <div style={{ maxWidth: 1020, margin: '0 auto', padding: '0 28px 48px' }}>
-            <h3 style={{ color: '#7adf8c', margin: '0 0 20px', fontSize: 13, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-              Completed
-            </h3>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
-                gap: 20,
-              }}
-            >
-              {completed.map((post) => (
-                <PostCard key={post.slug} post={post} />
-              ))}
+        {/* Posts — sit below the hero, fading in from the map */}
+        <div
+          style={{
+            background: 'linear-gradient(to bottom, transparent 0px, #060d08 80px)',
+            paddingTop: 40,
+          }}
+        >
+          {completed.length > 0 && (
+            <div style={{ maxWidth: 1020, margin: '0 auto', padding: '0 28px 48px' }}>
+              <h3
+                style={{
+                  color: '#7adf8c',
+                  margin: '0 0 20px',
+                  fontSize: 13,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Completed
+              </h3>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
+                  gap: 20,
+                }}
+              >
+                {completed.map((post) => (
+                  <PostCard key={post.slug} post={post} />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Planned section */}
-        {planned.length > 0 && (
-          <div style={{ maxWidth: 1020, margin: '0 auto', padding: '0 28px 64px' }}>
-            <h3 style={{ color: '#fbbf24', margin: '0 0 20px', fontSize: 13, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-              Planned
-            </h3>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
-                gap: 20,
-              }}
-            >
-              {planned.map((post) => (
-                <PostCard key={post.slug} post={post} />
-              ))}
+          {planned.length > 0 && (
+            <div style={{ maxWidth: 1020, margin: '0 auto', padding: '0 28px 64px' }}>
+              <h3
+                style={{
+                  color: '#fbbf24',
+                  margin: '0 0 20px',
+                  fontSize: 13,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Planned
+              </h3>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
+                  gap: 20,
+                }}
+              >
+                {planned.map((post) => (
+                  <PostCard key={post.slug} post={post} />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </>
   );

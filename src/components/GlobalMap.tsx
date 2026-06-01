@@ -116,6 +116,7 @@ function makeLeaderLabel(opts: {
 }
 
 export default function GlobalMap({ basemap = 'topo' }: { basemap?: GlobalBasemap }) {
+  const [hintVisible, setHintVisible] = React.useState(true);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const mapRef = React.useRef<maplibregl.Map | null>(null);
   const infoPanelRef = React.useRef<HTMLDivElement>(null);
@@ -262,7 +263,7 @@ export default function GlobalMap({ basemap = 'topo' }: { basemap?: GlobalBasema
         let leftPx = screenPt.x + 28;
         let topPx = screenPt.y - 50;
         if (leftPx + panelW > cw - 16) leftPx = screenPt.x - panelW - 28;
-        topPx = Math.max(44, Math.min(topPx, ch - 140));
+        topPx = Math.max(76, Math.min(topPx, ch - 140));
         panel.style.left = `${leftPx}px`;
         panel.style.top = `${topPx}px`;
 
@@ -337,7 +338,7 @@ export default function GlobalMap({ basemap = 'topo' }: { basemap?: GlobalBasema
       style: buildStyle(basemap),
       ...(prevCenter
         ? { center: prevCenter, zoom: prevZoom! }
-        : { bounds: [[-124.5, 32.5], [-116.0, 49.1]] as [[number, number], [number, number]], fitBoundsOptions: { padding: 40 } }),
+        : { bounds: [[-124.5, 32.5], [-116.0, 49.1]] as [[number, number], [number, number]], fitBoundsOptions: { padding: { top: 100, bottom: 120, left: 60, right: 280 } } }),
       pitch: 0,
       bearing: 0,
     });
@@ -357,9 +358,12 @@ export default function GlobalMap({ basemap = 'topo' }: { basemap?: GlobalBasema
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
       {/* Hint bar */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, textAlign: 'center', padding: '7px 16px', background: 'linear-gradient(to bottom, rgba(16,40,26,0.88) 70%, transparent)', fontFamily: 'sans-serif', fontSize: 12, color: '#7adf8c', letterSpacing: '0.04em', pointerEvents: 'none', userSelect: 'none' }}>
-        Hover over a section to view the associated post
-      </div>
+      {hintVisible && (
+        <div style={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 10, display: 'flex', alignItems: 'center', gap: 12, padding: '7px 16px', background: '#10281af0', border: '1.5px solid #7adf8c', borderRadius: 8, fontFamily: 'sans-serif', fontSize: 12, color: '#7adf8c', letterSpacing: '0.04em', whiteSpace: 'nowrap', boxShadow: '0 3px 14px rgba(0,0,0,0.65)', userSelect: 'none' }}>
+          Hover over a section to view the associated post
+          <button onClick={() => setHintVisible(false)} style={{ background: 'none', border: 'none', color: '#7adf8c', fontFamily: 'sans-serif', fontSize: 12, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>Close</button>
+        </div>
+      )}
       {/* Hover info panel — JS positions it next to the hovered section */}
       <div
         ref={infoPanelRef}
@@ -370,7 +374,7 @@ export default function GlobalMap({ basemap = 'topo' }: { basemap?: GlobalBasema
             if (p) { p.style.opacity = '0'; p.style.pointerEvents = 'none'; p.style.transform = 'translateX(8px)'; }
           }, 80);
         }}
-        style={{ position: 'absolute', left: 0, top: 0, zIndex: 10, opacity: 0, pointerEvents: 'none', transform: 'translateX(8px)', transition: 'opacity 0.18s ease, transform 0.18s ease', background: '#10281af0', border: '1.5px solid #7adf8c', borderRadius: 10, padding: '12px 16px', fontFamily: 'sans-serif', boxShadow: '0 4px 20px rgba(0,0,0,0.65)', minWidth: 220 }}
+        style={{ position: 'absolute', left: 0, top: 0, zIndex: 30, opacity: 0, pointerEvents: 'none', transform: 'translateX(8px)', transition: 'opacity 0.18s ease, transform 0.18s ease', background: '#10281af0', border: '1.5px solid #7adf8c', borderRadius: 10, padding: '12px 16px', fontFamily: 'sans-serif', boxShadow: '0 4px 20px rgba(0,0,0,0.65)', minWidth: 220 }}
       />
     </div>
   );

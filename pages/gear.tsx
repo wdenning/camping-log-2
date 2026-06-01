@@ -216,7 +216,38 @@ export default function GearPage() {
         * { box-sizing: border-box; }
       `}</style>
 
-      <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#10281a', color: '#e6ffe6', fontFamily: 'sans-serif' }}>
+      <div style={{ position: 'relative', display: 'flex', height: '100vh', overflow: 'hidden', background: '#10281a', color: '#e6ffe6', fontFamily: 'sans-serif' }}>
+
+        {/* Header overlay */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0,
+            zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px 24px',
+            background: 'linear-gradient(to bottom, rgba(16,40,26,0.92) 60%, transparent)',
+            pointerEvents: 'none',
+            paddingBottom: '2rem',
+          }}
+        >
+          <div>
+            <span style={{ color: '#b6f5c1', fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: 18 }}>
+              PCT Hike Log
+            </span>
+            <span style={{ color: '#4a7a5a', fontFamily: 'sans-serif', fontSize: 14, marginLeft: 12 }}>
+              Gear List
+            </span>
+          </div>
+          <Link
+            href="/"
+            style={{ color: '#7adf8c', fontFamily: 'sans-serif', fontSize: 14, textDecoration: 'none', fontWeight: 'bold', pointerEvents: 'all' }}
+          >
+            ← Home
+          </Link>
+        </div>
 
         {/* ── LEFT: donut ── */}
         <div style={{
@@ -233,9 +264,6 @@ export default function GearPage() {
           padding: '28px 8px',
           overflowY: 'hidden',
         }}>
-          <Link href="/" style={{ color: '#7adf8c', fontSize: 13, textDecoration: 'none', alignSelf: 'flex-start' }}>
-            ← Back
-          </Link>
 
           <div style={{ textAlign: 'center' }}>
             <div style={{ color: '#7adf8c', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 2 }}>PCT 2026</div>
