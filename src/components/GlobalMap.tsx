@@ -131,7 +131,8 @@ export default function GlobalMap({ basemap = 'topo' }: { basemap?: GlobalBasema
 
     if (!centerlineRef.current) {
       try {
-        const res = await fetch('/Full_PCT_Simplified.geojson');
+        const base = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+        const res = await fetch(`${base}/Full_PCT_Simplified.geojson`);
         centerlineRef.current = await res.json();
       } catch (e) {
         console.warn('Could not load PCT centerline', e);

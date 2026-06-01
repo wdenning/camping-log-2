@@ -381,15 +381,16 @@ const Map3D: React.FC<Map3DProps> = ({ startMile, endMile, trailGeoJson, visuali
     }
   }, [localShowPCTPOI, trailGeoJson, mapLoaded]);
 
-  // Halfmile waypoints layer
+  // Halfmile waypoints layers (dots + labels)
   React.useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded) return;
-    if (map.getLayer("halfmile-waypoints-layer")) map.removeLayer("halfmile-waypoints-layer");
+    if (map.getLayer("halfmile-waypoints-labels")) map.removeLayer("halfmile-waypoints-labels");
+    if (map.getLayer("halfmile-waypoints-dots")) map.removeLayer("halfmile-waypoints-dots");
     if (map.getSource("halfmile-waypoints")) map.removeSource("halfmile-waypoints");
     if (!waypoints || !waypoints.features?.length) return;
 
-    // Filter to meaningful landmark types (skip numbered route markers)
+    // Skip raw numbered route markers (e.g. "1093", "1093-5")
     const SKIP_PATTERN = /^\d+(-\d+)?$/;
     const meaningful = {
       ...waypoints,
@@ -400,19 +401,33 @@ const Map3D: React.FC<Map3DProps> = ({ startMile, endMile, trailGeoJson, visuali
     };
 
     map.addSource("halfmile-waypoints", { type: "geojson", data: meaningful });
+
+    // Colored circle dots
     map.addLayer({
-      id: "halfmile-waypoints-layer",
+      id: "halfmile-waypoints-dots",
+      type: "circle",
+      source: "halfmile-waypoints",
+      paint: {
+        "circle-radius": 4,
+        "circle-color": "#7adf8c",
+        "circle-stroke-color": "#10281a",
+        "circle-stroke-width": 1.5,
+        "circle-opacity": 0.9,
+      },
+    });
+
+    // Text labels to the right of each dot
+    map.addLayer({
+      id: "halfmile-waypoints-labels",
       type: "symbol",
       source: "halfmile-waypoints",
       layout: {
         "text-field": ["get", "name"],
         "text-size": 11,
-        "text-offset": [0, 1.4],
-        "text-anchor": "top",
+        "text-offset": [1.0, 0],
+        "text-anchor": "left",
         "text-optional": true,
         "text-allow-overlap": false,
-        "icon-image": ["coalesce", ["image", "circle-11"], ""],
-        "icon-size": 0.7,
       },
       paint: {
         "text-color": "#e6ffe6",
@@ -468,8 +483,8 @@ const Map3D: React.FC<Map3DProps> = ({ startMile, endMile, trailGeoJson, visuali
       const initialBearing = map.getBearing();
       const targetBearing = initialBearing + 90;
       const spin = () => {
-        t += 0.005; // slower (4s duration)
-        const smoothT = Math.min(t / 4, 1); // 4s duration
+        t += 1 / 30; // 2s duration at 60fps
+        const smoothT = Math.min(t / 4, 1); // 2s duration
         const bearing = initialBearing + (targetBearing - initialBearing) * smoothT;
         map.easeTo({
           center: coords[startMile] as [number, number],
