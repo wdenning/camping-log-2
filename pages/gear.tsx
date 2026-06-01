@@ -173,7 +173,15 @@ export default function GearPage() {
     return () => observer.disconnect();
   }, [isMobile]);
 
-  // Arc effect — items bow right as they pass the panel center
+  // Reset any lingering arc transforms when switching to mobile
+  useEffect(() => {
+    if (!isMobile || !panelRef.current) return;
+    panelRef.current.querySelectorAll<HTMLElement>('[data-gear-row]').forEach((el) => {
+      el.style.transform = '';
+    });
+  }, [isMobile]);
+
+  // Arc effect — items bow right as they pass the panel center (desktop only)
   useEffect(() => {
     const panel = panelRef.current;
     if (!panel || isMobile) return;
@@ -396,7 +404,7 @@ export default function GearPage() {
                     borderLeft: `3px solid ${cat.color}44`,
                     background: '#0f2016',
                     cursor: 'default',
-                    willChange: 'transform',
+                    willChange: isMobile ? 'auto' : 'transform',
                     maxWidth: isMobile ? '100%' : 340,
                   }}
                   onMouseEnter={(e) => {
