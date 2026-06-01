@@ -271,7 +271,7 @@ export default function GlobalMap({ basemap = 'topo' }: { basemap?: GlobalBasema
           <strong style="color:#b6f5c1;font-size:14px;display:block;margin-bottom:4px">${post.title}</strong>
           <span style="color:#7adf8c;font-size:12px">Miles ${post.pctMileStart}–${post.pctMileEnd}</span>
           <span style="color:#b6f5c1;font-size:12px;margin-left:8px;opacity:0.75">${post.date}</span>
-          <a href="/posts/${post.slug}" style="color:#7adf8c;font-weight:bold;font-size:13px;text-decoration:none;display:block;margin-top:8px">Open map →</a>
+          <a href="${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/posts/${post.slug}" style="color:#7adf8c;font-weight:bold;font-size:13px;text-decoration:none;display:block;margin-top:8px">Open map →</a>
         `;
         panel.style.opacity = '1';
         panel.style.pointerEvents = 'auto';
